@@ -23,7 +23,7 @@
         }
 
         body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; 
             background-color: #f0f0f0; /* 明亮的背景預設值 */
             font-family: 'Rajdhani', sans-serif; 
             user-select: none; 
@@ -47,6 +47,7 @@
             z-index: 100; 
             opacity: 1; visibility: visible;
             transition: opacity 0.4s ease, visibility 0.4s ease; 
+            overflow-y: auto;
         }
         .hidden { 
             opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; 
@@ -72,12 +73,13 @@
         .btn { 
             background: var(--primary-dark); 
             color: var(--primary-light); border: none; 
-            padding: 15px 50px; font-size: 1.5rem; font-weight: 600; font-family: 'Rajdhani', sans-serif;
+            padding: 15px 20px; font-size: 1.5rem; font-weight: 600; font-family: 'Rajdhani', sans-serif;
             cursor: pointer; text-transform: uppercase; letter-spacing: 4px; 
             transition: all 0.2s ease; position: relative;
             clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             width: 300px; box-sizing: border-box; text-align: center; display: inline-block;
+            white-space: nowrap;
         }
         .btn:hover { 
             background: var(--accent-cyan); color: var(--primary-dark); 
@@ -216,6 +218,31 @@
         }
         #settings-btn:hover { transform: rotate(90deg); }
 
+        /* 多人連線記分板 */
+        #scoreboard {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-top: 4px solid var(--accent-cyan);
+            padding: 15px 20px; min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: var(--primary-dark);
+            z-index: 60;
+        }
+        #scoreboard h3 {
+            margin: 0 0 10px 0; font-size: 1.2rem;
+            text-transform: uppercase; letter-spacing: 2px;
+            border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 5px;
+        }
+        .score-list { list-style: none; padding: 0; margin: 0; }
+        .score-item { 
+            display: flex; justify-content: space-between; 
+            font-size: 1.1rem; font-weight: 600; padding: 5px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+        .score-item:last-child { border-bottom: none; }
+        .score-val { color: var(--accent-red); font-weight: 800; font-size: 1.2rem; }
+
         /* --- 多人連線選單卡片排版 --- */
         .mp-card {
             background: rgba(255, 255, 255, 0.9);
@@ -324,6 +351,13 @@
         
         <div id="damage-overlay"></div>
         
+        <div id="scoreboard" class="hidden">
+            <h3>SCOREBOARD</h3>
+            <ul id="score-list-ui" class="score-list">
+                <!-- 記分板內容動態生成 -->
+            </ul>
+        </div>
+
         <div id="hud-tips">
             尋找 <span style="color: #0055ff;">藍色透明區域</span> 體驗無重力。<br>
             靠近高牆按住方向鍵即可 <span style="color: #ff2a2a;">蹬牆跑</span>。
@@ -984,6 +1018,7 @@
                     }
                 }
             }
+            updateScoreboardUI();
         }
 
         function handleLobbyAction() {
@@ -1020,7 +1055,7 @@
             peer.on('open', (id) => {
                 myPeerId = id;
                 if (isHost) {
-                    playersData[myPeerId] = { name: myNickname, isReady: true, isHost: true };
+                    playersData[myPeerId] = { name: myNickname, isReady: true, isHost: true, score: 0 };
                     updateLobbyUI();
                 } else {
                     clientConnection = peer.connect(roomCode);
@@ -1033,7 +1068,7 @@
                     hostConnections.push(conn);
                     conn.on('data', (data) => {
                         if (data.type === 'PLAYER_UPDATE') {
-                            playersData[conn.peer] = { name: data.name, isReady: data.isReady, isHost: false };
+                            playersData[conn.peer] = { name: data.name, isReady: data.isReady, isHost: false, score: 0 };
                             broadcast({ type: 'LOBBY_STATE', players: playersData });
                             updateLobbyUI();
                         } else if (data.type === 'SYNC_STATE') {
@@ -1070,6 +1105,7 @@
 
         function setupClientConnection(conn) {
             conn.on('open', () => {
+                playersData[myPeerId] = { name: myNickname, isReady: false, isHost: false, score: 0 };
                 conn.send({ type: 'PLAYER_UPDATE', name: myNickname, isReady: false });
             });
             conn.on('data', (data) => {
@@ -1082,7 +1118,7 @@
                 } else if (data.type === 'START_GAME') {
                     hideAllMenus();
                     document.getElementById('client-start-menu').classList.remove('hidden');
-                } else if (data.type === 'SYNC_STATE' || data.type === 'DAMAGE') {
+                } else if (data.type === 'SYNC_STATE' || data.type === 'DAMAGE' || data.type === 'PLAYER_KILLED') {
                     handlePeerData(data);
                 }
             });
@@ -1149,7 +1185,15 @@
                 rp.mesh.rotation.y = data.rot.yaw;
             } else if (data.type === 'DAMAGE') {
                 if (data.targetId === myPeerId) {
-                    takeDamage(data.amount);
+                    takeDamage(data.amount, data.shooterId);
+                }
+            } else if (data.type === 'PLAYER_KILLED') {
+                if (isHost) {
+                    if (playersData[data.killerId]) {
+                        playersData[data.killerId].score = (playersData[data.killerId].score || 0) + 1;
+                        broadcast({ type: 'LOBBY_STATE', players: playersData });
+                        updateLobbyUI();
+                    }
                 }
             }
         }
@@ -1218,6 +1262,7 @@
                 isPaused = false;
                 hideAllMenus();
                 document.getElementById('hud').classList.remove('hidden');
+                updateScoreboardUI();
             } else {
                 if (isGameRunning) {
                     isPaused = true;
@@ -1390,7 +1435,7 @@
         function processHit(raycaster, damage) {
             const remotePlayerMeshes = Object.values(remotePlayers).map(rp => rp.mesh);
             const allTargets = [...enemies.map(e=>e.mesh), ...destructibles.map(d=>d.mesh), ...collidableObjects.map(c=>c.mesh), ...remotePlayerMeshes];
-            const intersects = raycaster.intersectObjects(allTargets);
+            const intersects = raycaster.intersectObjects(allTargets, true);
 
             if (intersects.length > 0) {
                 const hitMesh = intersects[0].object;
@@ -1399,7 +1444,8 @@
                 // 檢查是否打中其他玩家 (PvP)
                 let hitPlayerId = null;
                 for (let id in remotePlayers) {
-                    if (remotePlayers[id].mesh === hitMesh) {
+                    let group = remotePlayers[id].mesh;
+                    if (hitMesh === group || hitMesh.parent === group) {
                         hitPlayerId = id;
                         break;
                     }
@@ -1408,20 +1454,18 @@
                 if (hitPlayerId) {
                     showHitMarker();
                     createExplosion(intersects[0].point, 0x00f3ff, 15);
-                    // 傳送傷害封包給房主
-                    let dmgPacket = { type: 'DAMAGE', targetId: hitPlayerId, amount: damage };
+                    // 傳送傷害封包給房主，加入 shooterId
+                    let dmgPacket = { type: 'DAMAGE', targetId: hitPlayerId, amount: damage, shooterId: myPeerId };
                     if (isHost) {
-                        // 如果自己是房主，直接送給對方
                         let targetConn = hostConnections.find(c => c.peer === hitPlayerId);
                         if (targetConn && targetConn.open) targetConn.send(dmgPacket);
                     } else {
-                        // 如果是玩家，送給房主代為轉發
                         if (clientConnection && clientConnection.open) clientConnection.send(dmgPacket);
                     }
                     return;
                 }
 
-                const enemy = enemies.find(e => e.mesh === hitMesh);
+                const enemy = enemies.find(e => e.mesh === hitMesh || e.mesh === hitMesh.parent);
                 if (enemy) {
                     enemy.hp -= damage;
                     showHitMarker();
@@ -1433,7 +1477,7 @@
                     return;
                 }
 
-                const dest = destructibles.find(d => d.mesh === hitMesh);
+                const dest = destructibles.find(d => d.mesh === hitMesh || d.mesh === hitMesh.parent);
                 if (dest) {
                     dest.hp -= damage;
                     if (dest.hp <= 0) {
@@ -1761,7 +1805,7 @@
             }
         }
 
-        function takeDamage(amount) {
+        function takeDamage(amount, shooterId = null) {
             player.health -= amount;
             updateHealthUI();
             
@@ -1775,9 +1819,58 @@
             setTimeout(() => { dmgOverlay.style.opacity = '0'; }, 300);
 
             if (player.health <= 0) {
-                alert("模擬失敗。系統重置。");
-                location.reload();
+                if (peer) {
+                    // 多人模式：重生並送出死亡封包
+                    respawnPlayer();
+                    if (shooterId) {
+                        let killPacket = { type: 'PLAYER_KILLED', killerId: shooterId, victimId: myPeerId };
+                        if (isHost) {
+                            if (playersData[shooterId]) {
+                                playersData[shooterId].score = (playersData[shooterId].score || 0) + 1;
+                                broadcast({ type: 'LOBBY_STATE', players: playersData });
+                                updateLobbyUI();
+                            }
+                        } else {
+                            if (clientConnection && clientConnection.open) clientConnection.send(killPacket);
+                        }
+                    }
+                } else {
+                    // 單機模式：遊戲結束
+                    alert("模擬失敗。系統重置。");
+                    location.reload();
+                }
             }
+        }
+
+        function respawnPlayer() {
+            player.health = 100;
+            updateHealthUI();
+            player.velocity.set(0, 0, 0);
+            const rx = Math.random() * 80 - 40;
+            const rz = Math.random() * 80 - 40;
+            camera.position.set(rx, 20, rz);
+        }
+
+        function updateScoreboardUI() {
+            const sbContainer = document.getElementById('scoreboard');
+            const listUI = document.getElementById('score-list-ui');
+            if (!peer || !isGameRunning) {
+                sbContainer.classList.add('hidden');
+                return;
+            }
+            sbContainer.classList.remove('hidden');
+            listUI.innerHTML = "";
+            
+            let sortedPlayers = Object.keys(playersData).map(id => {
+                return { id: id, name: playersData[id].name, score: playersData[id].score || 0 };
+            }).sort((a, b) => b.score - a.score);
+
+            sortedPlayers.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'score-item';
+                li.innerHTML = `<span>${p.name}${p.id === myPeerId ? ' (你)' : ''}</span> <span class="score-val">${p.score}</span>`;
+                listUI.appendChild(li);
+            });
         }
 
         function updateHealthUI() {
