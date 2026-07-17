@@ -41,13 +41,20 @@
         /* --- UI 轉場與選單樣式 (明亮風格) --- */
         .overlay { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            display: flex; flex-direction: column; justify-content: flex-start; align-items: center; 
             background: radial-gradient(circle at center, rgba(240, 240, 240, 0.9) 0%, rgba(200, 200, 200, 0.95) 100%);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             z-index: 100; 
             opacity: 1; visibility: visible;
             transition: opacity 0.4s ease, visibility 0.4s ease; 
             overflow-y: auto;
+        }
+        .overlay::before,
+        .overlay::after {
+            content: '';
+            margin: auto;
+            min-height: 60px;
+            flex-shrink: 0;
         }
         .hidden { 
             opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; 
@@ -99,7 +106,7 @@
         .manual-container h3 { color: var(--primary-dark); font-size: 2rem; margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase;}
         .manual-list { list-style: none; padding: 0; color: #333; font-size: 1.2rem; line-height: 1.8; }
         .manual-list li { margin-bottom: 12px; }
-        .key { display: inline-block; background: #eee; border: 1px solid #ccc; padding: 2px 10px; border-radius: 4px; font-weight: bold; color: #000; font-family: monospace; }
+        .key { display: inline-block; background: #eee; border: 1px solid #ccc; padding: 2px 10px; border-radius: 0; font-weight: bold; color: #000; font-family: monospace; }
         .highlight-text { color: var(--accent-red); font-weight: bold; }
 
         /* 暫停選單滑桿 */
@@ -162,13 +169,13 @@
         #skills-wrapper { 
             position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); 
             display: flex; gap: 40px; 
-            background: rgba(255,255,255,0.7); padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7); padding: 10px 20px; border-radius: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .skill-container { display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .cd-label { color: #333; font-size: 1rem; font-weight: 700; }
         .skill-bar-bg { 
             width: 120px; height: 8px; background: rgba(0,0,0,0.2); 
-            border-radius: 4px; overflow: hidden;
+            border-radius: 0; overflow: hidden;
         }
         #dash-bar { width: 100%; height: 100%; background: #333; }
         #grapple-bar { width: 100%; height: 100%; background: #666; }
@@ -177,7 +184,7 @@
         #weapon-info { 
             position: absolute; bottom: 40px; right: 40px; text-align: right; 
             display: flex; flex-direction: column; align-items: flex-end;
-            background: rgba(255,255,255,0.7); padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7); padding: 15px 25px; border-radius: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         #weapon-name { 
             font-size: 1.8rem; font-weight: 700; color: #111; text-transform: uppercase; 
@@ -242,6 +249,36 @@
         }
         .score-item:last-child { border-bottom: none; }
         .score-val { color: var(--accent-red); font-weight: 800; font-size: 1.2rem; }
+        
+        #notification-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .notification-toast {
+            background: rgba(0, 243, 255, 0.15);
+            border: 1px solid var(--accent-cyan);
+            border-left: 4px solid var(--accent-cyan);
+            color: #fff;
+            padding: 10px 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            text-shadow: 0 0 3px rgba(0, 243, 255, 0.8);
+            animation: slideInToast 0.3s ease-out forwards;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        @keyframes slideInToast {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
 
         /* --- 多人連線選單卡片排版 --- */
         .mp-card {
@@ -307,6 +344,69 @@
         .btn-green { background: #00cc44 !important; color: white !important; }
         .btn-green:hover { box-shadow: 0 0 20px rgba(0, 204, 68, 0.5) !important; }
         .btn-gray { background: #aaa !important; color: #555 !important; cursor: not-allowed !important; pointer-events: none; }
+
+        /* --- 武器選擇選單 --- */
+        .arrow-btn {
+            background: transparent; border: none; color: var(--primary-dark);
+            font-size: 4rem; cursor: pointer; transition: transform 0.2s, color 0.2s;
+            outline: none;
+        }
+        .arrow-btn:hover { transform: scale(1.2); color: var(--accent-cyan); text-shadow: 0 0 15px rgba(0,243,255,0.5); }
+        
+        .weapon-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-left: 5px solid var(--accent-cyan);
+            padding: 30px 40px; width: 520px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .weapon-card h3 {
+            margin: 0 0 10px 0; font-size: 2.5rem; color: var(--primary-dark); font-weight: 800;
+            letter-spacing: 2px; border-bottom: 2px solid #eee; padding-bottom: 10px;
+        }
+        .weapon-card p {
+            color: #666; font-size: 1.2rem; margin: 0 0 25px 0; font-weight: 600; height: 50px;
+        }
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .stat-label { font-weight: 700; color: var(--primary-dark); font-size: 1.1rem; width: 185px; white-space: nowrap; display: flex; justify-content: space-between; align-items: center; }
+        .stat-grid { display: flex; gap: 6px; }
+        .stat-box { width: 18px; height: 18px; background: #e0e0e0; transform: skewX(-15deg); transition: 0.2s; }
+        .stat-box.filled { background: var(--accent-cyan); box-shadow: 0 0 5px rgba(0,243,255,0.8); }
+        .stat-btn {
+            background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.2);
+            color: var(--primary-dark); font-weight: bold; width: 28px; height: 28px;
+            cursor: pointer; border-radius: 0; display: flex; justify-content: center; align-items: center;
+            transition: 0.2s; outline: none; font-size: 1.2rem;
+        }
+        .stat-btn:hover { background: var(--accent-cyan); color: #111; }
+        .stat-btn:active { transform: scale(0.9); }
+        .info-icon {
+            display: inline-flex; justify-content: center; align-items: center;
+            width: 18px; height: 18px; border-radius: 0;
+            background: rgba(0,0,0,0.1); color: #666;
+            font-size: 0.8rem; font-weight: bold; margin-left: 5px;
+            cursor: help; position: relative; vertical-align: middle;
+            transition: 0.2s;
+        }
+        .info-icon:hover {
+            background: var(--accent-cyan); color: #000;
+        }
+        .info-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute; left: 25px; top: 50%; transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 8px 12px; border-radius: 0;
+            font-size: 0.9rem; width: 220px; font-weight: normal; text-transform: none;
+            z-index: 10; pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            line-height: 1.4; white-space: normal; text-align: left;
+        }
     </style>
     <!-- 引入 Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -319,7 +419,7 @@
     <!-- 遊戲 HUD -->
     <div id="hud" class="hidden">
         <div id="settings-btn" title="設定 (ESC)">⚙️</div>
-        <div id="hud-tips">WASD 移動 | SPACE 跳躍 | 左鍵 開火 | 右鍵 抓鉤 | 1/2 切換武器</div>
+        <div id="hud-tips">WASD 移動 | SPACE 跳躍 | 左鍵 開火 | 右鍵 抓鉤</div>
         <div id="crosshair">
             <div class="ch-line ch-h"></div>
             <div class="ch-line ch-v"></div>
@@ -350,7 +450,9 @@
         </div>
         
         <div id="damage-overlay"></div>
-        
+    </div>
+    
+    <div id="notification-container"></div>    
         <div id="scoreboard" class="hidden">
             <h3>SCOREBOARD</h3>
             <ul id="score-list-ui" class="score-list">
@@ -416,15 +518,58 @@
                 <li><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span>：基礎移動。</li>
                 <li><span class="key">Space</span>：跳躍。在空中可再次按下進行 <b>二段跳</b>。</li>
                 <li><span class="key">Shift</span> (空中)：<b>衝刺 (Dash)</b>，向目前前進方向快速推進。</li>
-                <li><span class="key">滑鼠左鍵</span>：開火。使用 <span class="key">1</span> 和 <span class="key">2</span> 切換武器。</li>
+                <li><span class="key">滑鼠左鍵</span>：開火。</li>
+                <li>🎯 <b>爆頭 (Headshot)</b>：擊中敵人頭部 (膠囊體最上方 1/4 區域)，造成 2 倍傷害。</li>
                 <li><span class="key">滑鼠右鍵</span>：<b>抓鉤 (Grapple)</b>，瞄準牆壁發射，將自己拉向目標點。</li>
                 <li>🧗‍♂️ <b>蹬牆跑 (Wall Run)</b>：在空中靠近牆壁時，按住 <span class="key">W/A/S/D</span> 即可沿牆壁奔跑。</li>
                 <li>🌌 <b>無重力區 (Zero-G)</b>：場地中央上方的 <span class="highlight-text" style="color: #0055ff;">藍色透明立方體</span> 為無重力測試區。</li>
             </ul>
         </div>
         <div class="btn-wrapper" style="display: flex; gap: 20px; justify-content: center;">
-            <button class="btn" id="btn-mp-enter-lobby">進入大廳</button>
             <button class="btn" id="btn-mp-manual-back">回到主選單</button>
+            <button class="btn" id="btn-to-weapon-select">武器選擇</button>
+        </div>
+    </div>
+
+    <!-- 武器選擇畫面 -->
+    <div id="weapon-select-menu" class="overlay hidden">
+        <div class="title-container" style="margin-bottom: 30px;">
+            <h1 style="font-size: 4rem;">武器選擇<span>WEAPON SELECT</span></h1>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 40px; margin-bottom: 40px;">
+            <button class="arrow-btn" id="btn-prev-weapon">◀</button>
+            
+            <div class="weapon-card">
+                <h3 id="ws-name">KINETIC SHOTGUN</h3>
+                <p id="ws-desc">近距離高爆發力散彈槍</p>
+                <div id="ws-points-display" style="display: none; text-align: center; color: var(--accent-red); font-weight: bold; margin-bottom: 15px; font-size: 1.2rem;">剩餘可用點數: 0</div>
+                <div class="stats-container">
+                    <div class="stat-row">
+                        <span class="stat-label" style="display: flex; align-items: center;">傷害 (DAMAGE)<span class="info-icon" data-tooltip="數值越高，單發子彈的破壞力越強。(全彈命中總傷害最低 5%，最高 50%)">?</span></span>
+                        <div id="ws-stat-dmg" style="display: flex; align-items: center; gap: 10px;"></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label" style="display: flex; align-items: center;">射速 (FIRE RATE)<span class="info-icon" data-tooltip="數值越高，連發速度越快，但後座力（開火時槍口上揚幅度）也會隨之增強。(開火間隔最慢 1.5秒，最快 0.05秒)">?</span></span>
+                        <div id="ws-stat-rate" style="display: flex; align-items: center; gap: 10px;"></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label" style="display: flex; align-items: center;">距離 (RANGE)<span class="info-icon" data-tooltip="數值越高，子彈能飛行的極限距離越遠。(有效射程最低 20單位，最高 200單位)">?</span></span>
+                        <div id="ws-stat-range" style="display: flex; align-items: center; gap: 10px;"></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label" style="display: flex; align-items: center;">彈丸數量 (PELLETS)<span class="info-icon" data-tooltip="數值越高，擊發時分裂的子彈數越多、散佈範圍越廣，但總傷害會被分攤，使單顆彈丸傷害降低。(發射彈丸數最少 1發，最多 10發)">?</span></span>
+                        <div id="ws-stat-spread" style="display: flex; align-items: center; gap: 10px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="arrow-btn" id="btn-next-weapon">▶</button>
+        </div>
+
+        <div class="btn-wrapper" style="display: flex; gap: 20px; justify-content: center;">
+            <button class="btn" id="btn-weapon-back">上一步</button>
+            <button class="btn" id="btn-weapon-enter">進入大廳</button>
         </div>
     </div>
 
@@ -450,12 +595,12 @@
         </div>
 
         <div class="mp-card" style="padding: 20px 30px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-cyan);">玩家列表</div>
                 <div style="color: #666; font-size: 1rem; font-weight: bold;"><span id="player-count">1</span> 人</div>
             </div>
             
-            <div style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 10px 15px;">
+            <div style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-radius: 0; padding: 10px 15px;">
                 <ul id="player-list-ui" class="player-list" style="margin: 0;">
                     <!-- 玩家列表將透過 JS 動態生成 -->
                 </ul>
@@ -463,7 +608,7 @@
         </div>
 
         <div class="btn-wrapper" style="margin-top: 20px; gap: 15px; display: flex;">
-            <button class="btn" id="btn-lobby-back" style="width: 200px; background: #ccc; color: #333; box-shadow: none;">離開大廳</button>
+            <button class="btn" id="btn-lobby-back" style="width: 200px;">離開大廳</button>
             <button class="btn btn-gray" id="btn-lobby-action" style="width: 200px;">開始遊戲</button>
         </div>
     </div>
@@ -484,7 +629,8 @@
                 <li><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span>：基礎移動。</li>
                 <li><span class="key">Space</span>：跳躍。在空中可再次按下進行 <b>二段跳</b>。</li>
                 <li><span class="key">Shift</span> (空中)：<b>衝刺 (Dash)</b>，向目前前進方向快速推進。</li>
-                <li><span class="key">滑鼠左鍵</span>：開火。使用 <span class="key">1</span> 和 <span class="key">2</span> 切換武器。</li>
+                <li><span class="key">滑鼠左鍵</span>：開火。</li>
+                <li>🎯 <b>爆頭 (Headshot)</b>：擊中敵人頭部 (膠囊體最上方 1/4 區域)，造成 2 倍傷害。</li>
                 <li><span class="key">滑鼠右鍵</span>：<b>抓鉤 (Grapple)</b>，瞄準牆壁發射，將自己拉向目標點。</li>
                 <li>🧗‍♂️ <b>蹬牆跑 (Wall Run)</b>：在空中靠近牆壁時，按住 <span class="key">W/A/S/D</span> 即可沿牆壁奔跑。</li>
                 <li>🌌 <b>無重力區 (Zero-G)</b>：場地中央上方的 <span class="highlight-text" style="color: #0055ff;">藍色透明立方體</span> 為無重力測試區。進入後會失去重力，滑鼠視角決定移動方向。</li>
@@ -492,8 +638,8 @@
         </div>
 
         <div class="btn-wrapper" style="display: flex; gap: 20px; justify-content: center;">
-            <button class="btn" id="btn-manual-next">下一步</button>
             <button class="btn" id="btn-manual-back">回到主畫面</button>
+            <button class="btn" id="btn-manual-next">下一步</button>
         </div>
     </div>
 
@@ -520,7 +666,7 @@
             <h2 style="margin-bottom: 10px; border-bottom: none;">遊戲選單</h2>
             <div style="color: #666; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">Settings</div>
             
-            <div id="pause-room-info" class="hidden" style="margin-bottom: 30px; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
+            <div id="pause-room-info" class="hidden" style="margin-bottom: 30px; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 0; border: 1px solid rgba(0,0,0,0.1);">
                 <div style="font-size: 1.1rem; color: #555; margin-bottom: 10px; font-weight: bold;">連線代碼 (點擊複製)</div>
                 <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
                     <span id="pause-display-room-id" style="font-size: 2rem; font-weight: 800; color: var(--accent-red); letter-spacing: 5px; cursor: pointer;" onclick="copyRoomIdFromPause()"></span>
@@ -557,6 +703,13 @@
         // --- 玩家對戰狀態 ---
         let remotePlayers = {}; // { peerId: { mesh, hp } }
         let lastSyncTime = 0;
+        let singlePlayerScore = 0;
+
+        // --- 效能最佳化：全域共用幾何體與材質 ---
+        let sharedParticleGeo;
+        let particleMats = {};
+        let sharedProjGeo;
+        let sharedProjMat;
 
         let clock = new THREE.Clock();
         let delta = 0;
@@ -592,6 +745,14 @@
             inZeroG: false
         };
         
+        const WEAPONS = [
+            { id: 0, name: 'KINETIC SHOTGUN', desc: '近距離高爆發力散彈槍，一次發射多發彈丸。', dmgStat: 8, rateStat: 3, rangeStat: 3, spreadStat: 8, cooldown: 0.8, pellets: 8, damage: 5, jitter: 0.105, color: 0x222222, isCustom: false, recoil: 0.04 },
+            { id: 1, name: 'PLASMA RIFLE', desc: '穩定的中長距離步槍，精準度高。', dmgStat: 7, rateStat: 6, rangeStat: 8, spreadStat: 1, cooldown: 0.15, pellets: 1, damage: 35, jitter: 0.0, color: 0xaaaaaa, isCustom: false, recoil: 0.015 },
+            { id: 2, name: 'SUBMACHINE GUN', desc: '衝鋒槍。極快射速，適合中近距離作戰。', dmgStat: 5, rateStat: 10, rangeStat: 5, spreadStat: 2, cooldown: 0.06, pellets: 2, damage: 12.5, jitter: 0.015, color: 0x555555, isCustom: false, recoil: 0.02 },
+            { id: 3, name: 'CUSTOM WEAPON', desc: '自由配點，打造你的專屬武器。', dmgStat: 10, rateStat: 1, rangeStat: 10, spreadStat: 1, cooldown: 1.5, pellets: 1, damage: 50, jitter: 0.0, color: 0x8844ff, isCustom: true, recoil: 0.004 }
+        ];
+        let currentWeaponSelectionIndex = 0;
+        
         let pitch = 0, yaw = 0;
         const keys = { KeyW: false, KeyA: false, KeyS: false, KeyD: false, Space: false, ShiftLeft: false };
         let mouseButtons = { left: false, right: false };
@@ -618,6 +779,12 @@
         // --- 初始化 Three.js ---
         function init() {
             scene = new THREE.Scene();
+            
+            sharedParticleGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+            sharedProjGeo = new THREE.CylinderGeometry(0.1, 0.1, 2, 8);
+            sharedProjGeo.rotateX(Math.PI / 2);
+            sharedProjMat = new THREE.MeshBasicMaterial({ color: 0xff2a2a });
+
             // 改為淺色霧氣和背景
             scene.fog = new THREE.FogExp2(0xe0e5ec, 0.01);
             scene.background = new THREE.Color(0xe0e5ec);
@@ -670,6 +837,7 @@
             grappleGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
             grappleLine = new THREE.Line(grappleGeometry, material);
             grappleLine.visible = false;
+            grappleLine.frustumCulled = false; // 防止因為邊界球未更新而被相機剔除
             scene.add(grappleLine);
 
             buildLevel();
@@ -683,11 +851,92 @@
             document.addEventListener('keyup', onKeyUp);
             document.addEventListener('pointerlockchange', onPointerLockChange);
 
+            // 武器選擇 UI 更新函數
+            function updateWeaponUI() {
+                const w = WEAPONS[currentWeaponSelectionIndex];
+                document.getElementById('ws-name').innerText = w.name;
+                document.getElementById('ws-desc').innerText = w.desc;
+                
+                const MAX_POINTS = 22;
+                const currentPoints = w.dmgStat + w.rateStat + w.rangeStat + w.spreadStat;
+                const pointsRemaining = MAX_POINTS - currentPoints;
+                
+                const pointsDisplay = document.getElementById('ws-points-display');
+                if (w.isCustom) {
+                    pointsDisplay.style.display = 'block';
+                    pointsDisplay.innerText = `剩餘可用點數: ${pointsRemaining}`;
+                } else {
+                    pointsDisplay.style.display = 'none';
+                }
+                
+                const renderGrid = (id, value, statName) => {
+                    let html = '';
+                    if (w.isCustom) {
+                        html += `<button class="stat-btn" onclick="adjustCustomStat('${statName}', -1)">-</button>`;
+                    }
+                    html += `<div class="stat-grid">`;
+                    for(let i=0; i<10; i++) {
+                        html += `<div class="stat-box ${i < value ? 'filled' : ''}"></div>`;
+                    }
+                    html += `</div>`;
+                    if (w.isCustom) {
+                        html += `<button class="stat-btn" onclick="adjustCustomStat('${statName}', 1)">+</button>`;
+                    }
+                    document.getElementById(id).innerHTML = html;
+                };
+                
+                renderGrid('ws-stat-dmg', w.dmgStat, 'dmgStat');
+                renderGrid('ws-stat-rate', w.rateStat, 'rateStat');
+                renderGrid('ws-stat-range', w.rangeStat, 'rangeStat');
+                renderGrid('ws-stat-spread', w.spreadStat, 'spreadStat');
+                
+                // 預覽切換武器
+                switchWeapon(currentWeaponSelectionIndex);
+            }
+
+            window.adjustCustomStat = function(statName, delta) {
+                const w = WEAPONS[currentWeaponSelectionIndex];
+                if (!w.isCustom) return;
+                
+                const MAX_POINTS = 22;
+                const currentPoints = w.dmgStat + w.rateStat + w.rangeStat + w.spreadStat;
+                
+                if (delta > 0 && currentPoints >= MAX_POINTS) return; // 沒有剩餘點數
+                if (w[statName] + delta < 1 || w[statName] + delta > 10) return; // 邊界檢查
+                
+                w[statName] += delta;
+                
+                // 根據數值更新武器屬性
+                const totalDamage = w.dmgStat * 5; // 最大總潛在傷害 50
+                w.pellets = w.spreadStat; // 散佈1: 1發, 散佈10: 10發
+                w.damage = totalDamage / w.pellets; // 分攤到每發彈丸
+                
+                w.cooldown = 1.5 - ((w.rateStat - 1) / 9) * 1.45; // 射速1: 1.5s, 射速10: 0.05s
+                w.jitter = (w.spreadStat - 1) * 0.015; // 散佈越大，偏移越大
+                w.recoil = w.rateStat * 0.003 + (w.spreadStat * 0.001); // 射速與散佈共同影響後座力
+                
+                updateWeaponUI();
+            };
+
             // 新的 UI 流程綁定
-            document.getElementById('btn-pre-start').addEventListener('click', showManual);
-            document.getElementById('btn-manual-next').addEventListener('click', showDifficultyMenu);
+            let isSinglePlayer = true;
+            document.getElementById('btn-pre-start').addEventListener('click', () => {
+                isSinglePlayer = true;
+                showManual();
+            });
+            document.getElementById('btn-manual-next').addEventListener('click', () => {
+                document.getElementById('btn-weapon-enter').innerText = "下一步";
+                hideAllMenus();
+                document.getElementById('weapon-select-menu').classList.remove('hidden');
+                updateWeaponUI();
+            });
             document.getElementById('btn-manual-back').addEventListener('click', backToMainMenuFromManual);
-            document.getElementById('btn-difficulty-back').addEventListener('click', showManual);
+            document.getElementById('btn-difficulty-back').addEventListener('click', () => {
+                document.getElementById('btn-weapon-enter').innerText = "下一步";
+                hideAllMenus();
+                document.getElementById('weapon-select-menu').classList.remove('hidden');
+                updateWeaponUI();
+            });
             document.getElementById('btn-start-game').addEventListener('click', startGame);
 
             document.getElementById('btn-resume').addEventListener('click', resumeGame);
@@ -712,11 +961,45 @@
             });
 
             // 多人模式事件綁定
-            document.getElementById('btn-multiplayer').addEventListener('click', showMultiplayerMenu);
+            document.getElementById('btn-multiplayer').addEventListener('click', () => {
+                isSinglePlayer = false;
+                showMultiplayerMenu();
+            });
             document.getElementById('btn-create-room').addEventListener('click', createRoomFlow);
             document.getElementById('btn-join-room').addEventListener('click', joinRoomFlow);
             document.getElementById('btn-mp-back').addEventListener('click', backToMainMenuFromMP);
-            document.getElementById('btn-mp-enter-lobby').addEventListener('click', enterLobby);
+            
+            document.getElementById('btn-to-weapon-select').addEventListener('click', () => {
+                document.getElementById('btn-weapon-enter').innerText = "進入大廳";
+                hideAllMenus();
+                document.getElementById('weapon-select-menu').classList.remove('hidden');
+                updateWeaponUI();
+            });
+            document.getElementById('btn-prev-weapon').addEventListener('click', () => {
+                currentWeaponSelectionIndex = (currentWeaponSelectionIndex - 1 + WEAPONS.length) % WEAPONS.length;
+                updateWeaponUI();
+            });
+            document.getElementById('btn-next-weapon').addEventListener('click', () => {
+                currentWeaponSelectionIndex = (currentWeaponSelectionIndex + 1) % WEAPONS.length;
+                updateWeaponUI();
+            });
+            document.getElementById('btn-weapon-enter').addEventListener('click', () => {
+                if (isSinglePlayer) {
+                    hideAllMenus();
+                    document.getElementById('difficulty-menu').classList.remove('hidden');
+                } else {
+                    enterLobby();
+                }
+            });
+            document.getElementById('btn-weapon-back').addEventListener('click', () => {
+                hideAllMenus();
+                if (isSinglePlayer) {
+                    document.getElementById('manual-menu').classList.remove('hidden');
+                } else {
+                    document.getElementById('mp-manual-menu').classList.remove('hidden');
+                }
+            });
+
             document.getElementById('btn-mp-manual-back').addEventListener('click', backToMainMenuFromMPManual);
             document.getElementById('btn-lobby-back').addEventListener('click', leaveLobby);
             if(document.getElementById('btn-copy-code')) document.getElementById('btn-copy-code').addEventListener('click', copyRoomCode);
@@ -725,32 +1008,41 @@
             document.getElementById('btn-save-nickname').addEventListener('click', () => {
                 myNickname = document.getElementById('player-nickname').value || "Player";
                 updateLobbyState();
-                alert("暱稱已儲存！");
+                showNotification("暱稱已儲存！");
             });
 
             if(document.getElementById('btn-client-enter-match')) {
                 document.getElementById('btn-client-enter-match').addEventListener('click', () => {
-                    hideAllMenus();
-                    document.body.requestPointerLock();
+                    startGame();
                 });
             }
 
             animate();
         }
 
+        function disposeHierarchy(node) {
+            if (!node) return;
+            if (node.geometry) node.geometry.dispose();
+            if (node.material) {
+                if (Array.isArray(node.material)) node.material.forEach(m => m.dispose());
+                else node.material.dispose();
+            }
+            if (node.children) node.children.forEach(disposeHierarchy);
+        }
+
         // --- 關卡生成 (明亮風格) ---
         function buildLevel() {
-            collidableObjects.forEach(obj => scene.remove(obj.mesh));
+            collidableObjects.forEach(obj => { scene.remove(obj.mesh); disposeHierarchy(obj.mesh); });
             collidableObjects.length = 0;
-            enemies.forEach(e => scene.remove(e.mesh));
+            enemies.forEach(e => { scene.remove(e.mesh); disposeHierarchy(e.mesh); });
             enemies.length = 0;
-            destructibles.forEach(d => scene.remove(d.mesh));
+            destructibles.forEach(d => { scene.remove(d.mesh); disposeHierarchy(d.mesh); });
             destructibles.length = 0;
-            healthPacks.forEach(h => scene.remove(h.mesh));
+            healthPacks.forEach(h => { scene.remove(h.mesh); disposeHierarchy(h.mesh); });
             healthPacks.length = 0;
-            zeroGZones.forEach(z => scene.remove(z.mesh));
+            zeroGZones.forEach(z => { scene.remove(z.mesh); disposeHierarchy(z.mesh); });
             zeroGZones.length = 0;
-            enemyProjectiles.forEach(p => scene.remove(p.mesh));
+            enemyProjectiles.forEach(p => { scene.remove(p.mesh); disposeHierarchy(p.mesh); });
             enemyProjectiles.length = 0;
 
             // 白色/淺灰系材質
@@ -904,7 +1196,7 @@
                 hideAllMenus();
                 document.getElementById('mp-manual-menu').classList.remove('hidden');
             } else {
-                alert("請輸入房間代碼！");
+                showNotification("請輸入房間代碼！");
             }
         }
 
@@ -915,32 +1207,28 @@
         }
 
         function leaveLobby() {
+            for(let id in remotePlayers) { removeRemotePlayer(id); }
             if (peer) { peer.destroy(); peer = null; }
             hostConnections = [];
             clientConnection = null;
             playersData = {};
-            // 清除連線玩家模型
-            for(let id in remotePlayers) {
-                removeRemotePlayer(id);
-            }
             hideAllMenus();
-            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('weapon-select-menu').classList.remove('hidden');
         }
 
         function copyRoomCode() {
             navigator.clipboard.writeText(roomCode);
-            alert("已複製房間代碼: " + roomCode);
+            showNotification("已複製房間代碼: " + roomCode);
         }
 
         function updateLobbyUI() {
             const listUI = document.getElementById('player-list-ui');
             listUI.innerHTML = "";
             let allClientsReady = true;
-            let clientCount = 0;
             let totalPlayers = 0;
 
             if (isHost) {
-                document.getElementById('room-info-container').innerHTML = `<span id="room-code-display" class="room-code-display" style="color: var(--accent-cyan); font-weight: 800;">${roomCode}</span> <button class="copy-btn" id="btn-copy-code" onclick="copyRoomCode()" style="background: #9d7dff; color: #fff; border-radius: 15px; padding: 5px 15px;">複製</button>`;
+                document.getElementById('room-info-container').innerHTML = `<span id="room-code-display" class="room-code-display" style="color: var(--accent-cyan); font-weight: 800;">${roomCode}</span> <button class="copy-btn" id="btn-copy-code" onclick="copyRoomCode()" style="background: #9d7dff; color: #fff; border-radius: 0; padding: 5px 15px;">複製</button>`;
             } else {
                 document.getElementById('room-info-container').innerHTML = `<span id="room-code-display" class="room-code-display" style="color: var(--accent-cyan); font-weight: 800;">${roomCode}</span>`;
             }
@@ -968,11 +1256,10 @@
                     hostTag.style.border = "1px solid #00cc44";
                     hostTag.style.color = "#00cc44";
                     hostTag.style.padding = "2px 8px";
-                    hostTag.style.borderRadius = "4px";
+                    hostTag.style.borderRadius = "0";
                     hostTag.style.fontSize = "0.9rem";
                     rightDiv.appendChild(hostTag);
                 } else {
-                    clientCount++;
                     let statusSpan = document.createElement('span');
                     statusSpan.innerText = p.isReady ? "已準備" : "未準備";
                     statusSpan.className = p.isReady ? "status-ready" : "status-not-ready";
@@ -1078,19 +1365,26 @@
                             });
                         } else if (data.type === 'DAMAGE') {
                             if (data.targetId === myPeerId) {
-                                takeDamage(data.amount);
+                                takeDamage(data.amount, data.shooterId);
                             } else {
                                 let targetConn = hostConnections.find(c => c.peer === data.targetId);
                                 if (targetConn && targetConn.open) {
                                     targetConn.send(data);
                                 }
                             }
+                        } else if (data.type === 'PLAYER_KILLED') {
+                            if (playersData[data.killerId]) {
+                                playersData[data.killerId].score = (playersData[data.killerId].score || 0) + 1;
+                                broadcast({ type: 'LOBBY_STATE', players: playersData });
+                                updateLobbyUI();
+                            }
                         }
                     });
                     conn.on('close', () => {
+                        const leaverName = (playersData[conn.peer] && playersData[conn.peer].name) ? playersData[conn.peer].name : "某玩家";
+                        showNotification(`${leaverName} 已離開房間`);
                         delete playersData[conn.peer];
                         removeRemotePlayer(conn.peer);
-                        hostConnections = hostConnections.filter(c => c.peer !== conn.peer);
                         broadcast({ type: 'LOBBY_STATE', players: playersData });
                         updateLobbyUI();
                     });
@@ -1098,7 +1392,7 @@
             }
             
             peer.on('error', (err) => {
-                alert("連線錯誤: " + err.type);
+                showNotification("連線錯誤: " + err.type);
                 leaveLobby();
             });
         }
@@ -1110,14 +1404,21 @@
             });
             conn.on('data', (data) => {
                 if (data.type === 'LOBBY_STATE') {
+                    for (let id in remotePlayers) {
+                        if (!data.players[id]) {
+                            const leaverName = (playersData[id] && playersData[id].name) ? playersData[id].name : "某玩家";
+                            showNotification(`${leaverName} 已離開房間`);
+                            removeRemotePlayer(id);
+                        }
+                    }
                     playersData = data.players;
                     updateLobbyUI();
                 } else if (data.type === 'KICK') {
-                    alert("你被踢出了房間。");
+                    showNotification("你被踢出了房間。");
                     leaveLobby();
                 } else if (data.type === 'START_GAME') {
                     hideAllMenus();
-                    document.getElementById('client-start-menu').classList.remove('hidden');
+                    if (isGameRunning && document.getElementById('client-start-menu').classList.contains('hidden')) { } else { document.getElementById('client-start-menu').classList.remove('hidden'); }
                 } else if (data.type === 'SYNC_STATE' || data.type === 'DAMAGE' || data.type === 'PLAYER_KILLED') {
                     handlePeerData(data);
                 }
@@ -1157,6 +1458,16 @@
             return group;
         }
 
+        function disposeHierarchy(node) {
+            node.traverse(child => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                    else child.material.dispose();
+                }
+            });
+        }
+
         // --- 多人對戰同步與傷害處理 ---
         function getOrCreateRemotePlayer(peerId) {
             if (remotePlayers[peerId]) return remotePlayers[peerId];
@@ -1172,8 +1483,26 @@
         function removeRemotePlayer(peerId) {
             if (remotePlayers[peerId]) {
                 scene.remove(remotePlayers[peerId].mesh);
+                disposeHierarchy(remotePlayers[peerId].mesh);
                 delete remotePlayers[peerId];
             }
+        }
+
+        function showNotification(msg) {
+            const container = document.getElementById('notification-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'notification-toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (container.contains(toast)) container.removeChild(toast);
+                }, 500);
+            }, 3000);
         }
 
         function handlePeerData(data) {
@@ -1236,9 +1565,15 @@
         function startGame() { 
             hideAllMenus();
             if (peer) {
-                enemies.forEach(e => scene.remove(e.mesh));
+                enemies.forEach(e => { scene.remove(e.mesh); disposeHierarchy(e.mesh); });
                 enemies.length = 0;
             }
+            
+            // 隨機出生點 (避免多人模式重疊)
+            camera.position.set((Math.random() - 0.5) * 80, 10, (Math.random() - 0.5) * 80);
+            player.velocity.set(0,0,0);
+            singlePlayerScore = 0;
+            
             document.body.requestPointerLock(); 
         }
         
@@ -1314,8 +1649,6 @@
                     keys.ShiftLeft = true; 
                     player.isSliding = player.isGrounded;
                     break;
-                case 'Digit1': switchWeapon(0); break;
-                case 'Digit2': switchWeapon(1); break;
             }
         }
 
@@ -1398,13 +1731,9 @@
 
         function switchWeapon(id) {
             player.currentWeapon = id;
-            if (id === 0) {
-                document.getElementById('weapon-name').innerText = "KINETIC SHOTGUN";
-                player.weaponMesh.material.color.setHex(0x222222);
-            } else {
-                document.getElementById('weapon-name').innerText = "PLASMA RIFLE";
-                player.weaponMesh.material.color.setHex(0xaaaaaa);
-            }
+            const w = WEAPONS[id];
+            document.getElementById('weapon-name').innerText = w.name;
+            player.weaponMesh.material.color.setHex(w.color);
         }
 
         function handleShooting() {
@@ -1414,30 +1743,37 @@
             muzzleFlash.intensity = 2;
             
             const raycaster = new THREE.Raycaster();
-            const center = new THREE.Vector2(0, 0);
-
-            if (player.currentWeapon === 0) { 
-                player.weaponCooldown = 0.8;
-                for (let i = 0; i < 8; i++) {
-                    const jitter = new THREE.Vector2( (Math.random()-0.5)*0.1, (Math.random()-0.5)*0.1 );
-                    raycaster.setFromCamera(jitter, camera);
-                    processHit(raycaster, 20);
+            const w = WEAPONS[player.currentWeapon];
+            
+            player.weaponCooldown = w.cooldown;
+            
+            for (let i = 0; i < w.pellets; i++) {
+                let jitterX = 0, jitterY = 0;
+                if (w.jitter > 0) {
+                    jitterX = (Math.random() - 0.5) * w.jitter;
+                    jitterY = (Math.random() - 0.5) * w.jitter;
                 }
-            } else { 
-                player.weaponCooldown = 0.1;
-                raycaster.setFromCamera(center, camera);
-                processHit(raycaster, 15);
+                raycaster.setFromCamera(new THREE.Vector2(jitterX, jitterY), camera);
+                let maxDistance = w.rangeStat * 20;
+                processHit(raycaster, w.damage, maxDistance);
+            }
+
+            // 加入後座力效果 (鏡頭上抬)
+            if (w.recoil) {
+                pitch += w.recoil;
+                pitch = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, pitch));
+                camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
             }
 
             setTimeout(() => { muzzleFlash.intensity = 0; }, 50);
         }
 
-        function processHit(raycaster, damage) {
+        function processHit(raycaster, damage, maxDistance = 1000) {
             const remotePlayerMeshes = Object.values(remotePlayers).map(rp => rp.mesh);
             const allTargets = [...enemies.map(e=>e.mesh), ...destructibles.map(d=>d.mesh), ...collidableObjects.map(c=>c.mesh), ...remotePlayerMeshes];
             const intersects = raycaster.intersectObjects(allTargets, true);
 
-            if (intersects.length > 0) {
+            if (intersects.length > 0 && intersects[0].distance <= maxDistance) {
                 const hitMesh = intersects[0].object;
                 createExplosion(intersects[0].point, 0x333333, 5); // 開火灰燼
 
@@ -1453,9 +1789,25 @@
 
                 if (hitPlayerId) {
                     showHitMarker();
-                    createExplosion(intersects[0].point, 0x00f3ff, 15);
+                    let rpMesh = remotePlayers[hitPlayerId].mesh;
+                    let hitY = intersects[0].point.y - rpMesh.position.y;
+                    let finalDamage = damage;
+                    let isHeadshot = false;
+
+                    // 玩家總高度為 3.6 (圓柱2.0 + 兩顆半球0.8*2)，最上方 1/4 為 0.9 ~ 1.8
+                    if (hitY > 0.9) {
+                        finalDamage *= 2;
+                        isHeadshot = true;
+                    }
+
+                    if (isHeadshot) {
+                        createExplosion(intersects[0].point, 0xffd700, 15);
+                    } else {
+                        createExplosion(intersects[0].point, 0x00f3ff, 15);
+                    }
+
                     // 傳送傷害封包給房主，加入 shooterId
-                    let dmgPacket = { type: 'DAMAGE', targetId: hitPlayerId, amount: damage, shooterId: myPeerId };
+                    let dmgPacket = { type: 'DAMAGE', targetId: hitPlayerId, amount: finalDamage, shooterId: myPeerId, isHeadshot: isHeadshot };
                     if (isHost) {
                         let targetConn = hostConnections.find(c => c.peer === hitPlayerId);
                         if (targetConn && targetConn.open) targetConn.send(dmgPacket);
@@ -1467,12 +1819,40 @@
 
                 const enemy = enemies.find(e => e.mesh === hitMesh || e.mesh === hitMesh.parent);
                 if (enemy) {
-                    enemy.hp -= damage;
+                    let hitY = intersects[0].point.y - enemy.mesh.position.y;
+                    let finalDamage = damage;
+                    let isHeadshot = false;
+
+                    // 敵人總高度為 7.0 (圓柱4.0 + 兩顆半球1.5*2)，最上方 1/4 為 1.75 ~ 3.5
+                    if (hitY > 1.75) {
+                        finalDamage *= 2;
+                        isHeadshot = true;
+                    }
+
+                    enemy.hp -= finalDamage;
                     showHitMarker();
+                    if (isHeadshot) {
+                        createExplosion(intersects[0].point, 0xffd700, 15); // 爆頭金色特效
+                    }
                     if (enemy.hp <= 0) {
                         createExplosion(enemy.mesh.position, 0xff2a2a, 30);
                         scene.remove(enemy.mesh);
+                        disposeHierarchy(enemy.mesh);
                         enemies.splice(enemies.indexOf(enemy), 1);
+                        
+                        // 單人模式擊殺分數與重生
+                        if (!peer) {
+                            singlePlayerScore++;
+                            updateScoreboardUI();
+                            setTimeout(() => {
+                                if (isGameRunning && !peer) {
+                                    const mesh = createCapsule(1.5, 4.0, 0xff2a2a);
+                                    mesh.position.set(Math.random()*80-40, 10 + Math.random()*20, Math.random()*80-40);
+                                    scene.add(mesh);
+                                    enemies.push({ mesh: mesh, hp: 100, velocity: new THREE.Vector3(), fireTimer: Math.random() * 2 });
+                                }
+                            }, 3000);
+                        }
                     }
                     return;
                 }
@@ -1483,6 +1863,7 @@
                     if (dest.hp <= 0) {
                         createExplosion(dest.mesh.position, 0xffaa00, 40);
                         scene.remove(dest.mesh);
+                        disposeHierarchy(dest.mesh);
                         destructibles.splice(destructibles.indexOf(dest), 1);
                     }
                 }
@@ -1504,10 +1885,12 @@
         }
 
         function createExplosion(position, color, count) {
-            const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-            const mat = new THREE.MeshBasicMaterial({ color: color });
+            if (!particleMats[color]) {
+                particleMats[color] = new THREE.MeshBasicMaterial({ color: color });
+            }
+            const mat = particleMats[color];
             for (let i = 0; i < count; i++) {
-                const mesh = new THREE.Mesh(geo, mat);
+                const mesh = new THREE.Mesh(sharedParticleGeo, mat);
                 mesh.position.copy(position);
                 scene.add(mesh);
                 particles.push({
@@ -1740,14 +2123,9 @@
                     const intersects = raycaster.intersectObjects([...collidableObjects.map(c=>c.mesh)]);
                     
                     if (intersects.length === 0 || intersects[0].distance > dist) {
-                        const projGeo = new THREE.CylinderGeometry(0.1, 0.1, 2, 8);
-                        projGeo.rotateX(Math.PI / 2); 
-                        const projMat = new THREE.MeshBasicMaterial({ color: 0xff2a2a });
-                        const projectile = new THREE.Mesh(projGeo, projMat);
-                        
-                        projectile.position.copy(enemy.mesh.position);
+                        const projectile = new THREE.Mesh(sharedProjGeo, sharedProjMat);
+                        projectile.position.copy(enemy.mesh.position).add(new THREE.Vector3(0, player.height * 0.6, 0));
                         projectile.lookAt(camera.position);
-                        
                         scene.add(projectile);
                         
                         enemyProjectiles.push({
@@ -1854,23 +2232,30 @@
         function updateScoreboardUI() {
             const sbContainer = document.getElementById('scoreboard');
             const listUI = document.getElementById('score-list-ui');
-            if (!peer || !isGameRunning) {
+            if (!isGameRunning) {
                 sbContainer.classList.add('hidden');
                 return;
             }
             sbContainer.classList.remove('hidden');
             listUI.innerHTML = "";
             
-            let sortedPlayers = Object.keys(playersData).map(id => {
-                return { id: id, name: playersData[id].name, score: playersData[id].score || 0 };
-            }).sort((a, b) => b.score - a.score);
+            if (peer) {
+                let sortedPlayers = Object.keys(playersData).map(id => {
+                    return { id: id, name: playersData[id].name, score: playersData[id].score || 0 };
+                }).sort((a, b) => b.score - a.score);
 
-            sortedPlayers.forEach(p => {
+                sortedPlayers.forEach(p => {
+                    const li = document.createElement('li');
+                    li.className = 'score-item';
+                    li.innerHTML = `<span>${p.name}${p.id === myPeerId ? ' (你)' : ''}</span> <span class="score-val">${p.score}</span>`;
+                    listUI.appendChild(li);
+                });
+            } else {
                 const li = document.createElement('li');
                 li.className = 'score-item';
-                li.innerHTML = `<span>${p.name}${p.id === myPeerId ? ' (你)' : ''}</span> <span class="score-val">${p.score}</span>`;
+                li.innerHTML = `<span>單人模式擊殺數</span> <span class="score-val">${singlePlayerScore}</span>`;
                 listUI.appendChild(li);
-            });
+            }
         }
 
         function updateHealthUI() {
